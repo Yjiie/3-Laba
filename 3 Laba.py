@@ -18,6 +18,7 @@ D C
 
 '''
 
+# Функция вывода матриц
 def print_matrix(matrix):
     for row in matrix:
         print("|", end='')
@@ -26,6 +27,7 @@ def print_matrix(matrix):
         print("|")
     print("")
 
+# Операции над матрицами (сложение, вычитание, умножение)
 def operations_matrix(matrix1, matrix2, sign, len_matrix):
     result = [[0 for _ in range(len_matrix)] for _ in range(len_matrix)]
     for row in range(len_matrix):
@@ -41,6 +43,7 @@ def operations_matrix(matrix1, matrix2, sign, len_matrix):
                     result[row][column] += matrix1[row][k] * matrix2[k][column]
     return result
 
+# Функция транспонирования матрицы
 def transpose_matrix(matrix, len_matrix):
     transposed = [[0 for _ in range(len_matrix)] for _ in range(len_matrix)]
     for i in range(len_matrix):
@@ -48,55 +51,84 @@ def transpose_matrix(matrix, len_matrix):
             transposed[j][i] = matrix[i][j]
     return transposed
 
+# Функция для создания верхнего треугольника
+def create_upper_triangle(N):
+    matrix = [[0 for _ in range(N)] for _ in range(N)]
+    value = 1
+    for i in range(N):
+        for j in range(i + 1):
+            matrix[i][j] = value
+            value += 1
+    return matrix
+
+# Функция для создания нижнего треугольника
+def create_lower_triangle(N):
+    matrix = [[0 for _ in range(N)] for _ in range(N)]
+    value = 1
+    for i in range(N):
+        for j in range(N - i):
+            matrix[i][N - j - 1] = value
+            value += 1
+    return matrix
+
+# Вводим значение K и размер матрицы N
 K = int(input("Введите число K: "))
 while True:
-    N = int(input("Введите размер матрицы N: "))
+    N = int(input("Введите размер матрицы N (6 <= N <= 50): "))
     if 6 <= N <= 50:
         break
     else:
         print("Ошибка: Размер матрицы должен быть не меньше 6 и не больше 50.")
 
-matrix_A = [[i * N + j for j in range(N)] for i in range(N)]
+# Генерация верхнего и нижнего треугольников
+upper_triangle_matrix = create_upper_triangle(N)
+lower_triangle_matrix = create_lower_triangle(N)
+
+# Выводим верхний и нижний треугольники
+print("Верхний треугольник:")
+print_matrix(upper_triangle_matrix)
+
+print("Нижний треугольник:")
+print_matrix(lower_triangle_matrix)
+
 SIZE_submat = N // 2
 
-print("Матрица A(N, N):")
-print_matrix(matrix_A)
-
-matrix_B = [row[:SIZE_submat] for row in matrix_A[:SIZE_submat]]
-matrix_C = [row[SIZE_submat:] for row in matrix_A[SIZE_submat:]]
-matrix_D = [row[:SIZE_submat] for row in matrix_A[SIZE_submat:]]
-matrix_E = [row[SIZE_submat:] for row in matrix_A[:SIZE_submat]]
-
+# Подсчет чисел, меньших K в нечетных столбцах в области 3 (матрица B)
 count_region3 = 0
 for row in range(SIZE_submat):
     for column in range(SIZE_submat):
-        if (column % 2 != 0) and matrix_B[row][column] < K:
+        if (column % 2 != 0) and upper_triangle_matrix[row][column] < K:
             count_region3 += 1
 
+# Сумма чисел в четных строках в области 2 (матрица C)
 sum_region2 = 0
 for row in range(SIZE_submat):
     for column in range(SIZE_submat, N):
         if row % 2 == 0:
-            sum_region2 += matrix_C[row][column - SIZE_submat]
+            sum_region2 += lower_triangle_matrix[row][column - SIZE_submat]
 
-matrix_F = [[item for item in row] for row in matrix_A]
+# Создаем матрицу F, которая является копией матрицы A (верхний треугольник)
+matrix_F = [[item for item in row] for row in upper_triangle_matrix]
 
+# Проверяем условие и меняем местами области
 if count_region3 > sum_region2:
     for row in range(SIZE_submat):
         for column in range(SIZE_submat):
             if (column % 2 != 0) and (row % 2 == 0):
-                matrix_E[row][column], matrix_E[SIZE_submat - 1 - row][SIZE_submat - 1 - column] = \
-                    matrix_E[SIZE_submat - 1 - row][SIZE_submat - 1 - column], matrix_E[row][column]
+                matrix_F[row][column], matrix_F[SIZE_submat - 1 - row][SIZE_submat - 1 - column] = \
+                    matrix_F[SIZE_submat - 1 - row][SIZE_submat - 1 - column], matrix_F[row][column]
 else:
     for row in range(SIZE_submat):
         for column in range(SIZE_submat):
             matrix_F[row][column], matrix_F[row + SIZE_submat][column + SIZE_submat] = \
                 matrix_F[row + SIZE_submat][column + SIZE_submat], matrix_F[row][column]
 
-print("Матрица F после всех изменений: ")
+# Выводим матрицу F после всех изменений
+print("Матрица F после всех изменений:")
 print_matrix(matrix_F)
 
-matrix_KA = operations_matrix(matrix_A, K, '*', N)
+# Вычисляем выражение ((K*A)*F – K*A^T)
+matrix_KA = operations_matrix(upper_triangle_matrix, K, '*', N)
 print("Матрица K*A:")
 print_matrix(matrix_KA)
 
@@ -104,7 +136,7 @@ matrix_KAF = operations_matrix(matrix_KA, matrix_F, '*', N)
 print("Матрица (K*A)*F:")
 print_matrix(matrix_KAF)
 
-matrix_AT = transpose_matrix(matrix_A, N)
+matrix_AT = transpose_matrix(upper_triangle_matrix, N)
 print("Матрица A^T:")
 print_matrix(matrix_AT)
 
@@ -115,4 +147,5 @@ print_matrix(matrix_KAT)
 result = operations_matrix(matrix_KAF, matrix_KAT, '-', N)
 print("Результат ((K*A)*F – K*A^T):")
 print_matrix(result)
+
 
