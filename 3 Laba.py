@@ -18,8 +18,6 @@ D C
 
 '''
 
-import random
-
 def print_matrix(matrix):
     for row in matrix:
         print("|", end='')
@@ -58,12 +56,8 @@ while True:
     else:
         print("Ошибка: Размер матрицы должен быть не меньше 6 и не больше 50.")
 
-matrix_A = [[0 for _ in range(N)] for _ in range(N)]
+matrix_A = [[i * N + j for j in range(N)] for i in range(N)]
 SIZE_submat = N // 2
-
-for row in range(N):
-    for column in range(N):
-        matrix_A[row][column] = random.randint(-10, 10)
 
 print("Матрица A(N, N):")
 print_matrix(matrix_A)
